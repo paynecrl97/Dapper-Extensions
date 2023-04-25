@@ -63,6 +63,10 @@ namespace DapperExtensions
         /// </summary>
         Task<bool> UpdateAsync<T>(IDbConnection connection, T entity, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties = false, IList<IProjection> colsToUpdate = null);
         /// <summary>
+        /// The asynchronous counterpart to <see cref="IDapperImplementor.Update{T}(IDbConnection, T, object, IDbTransaction, int?)"/>.
+        /// </summary>
+        Task<bool> UpdateAsync<T>(IDbConnection connection, T entity, object predicate, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties = true, IList<IProjection> colsToUpdate = null);
+        /// <summary>
         /// The asynchronous counterpart to <see cref="IDapperImplementor.Delete{T}(IDbConnection, T, IDbTransaction, int?)"/>.
         /// </summary>
         Task<bool> DeleteAsync<T>(IDbConnection connection, T entity, IDbTransaction transaction, int? commandTimeout);
@@ -119,6 +123,13 @@ namespace DapperExtensions
         public async Task<bool> UpdateAsync<T>(IDbConnection connection, T entity, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties, IList<IProjection> colsToUpdate = null)
         {
             return await InternalUpdateAsync(connection, entity, transaction, colsToUpdate, commandTimeout, ignoreAllKeyProperties);
+        }
+        /// <summary>
+        /// The asynchronous counterpart to <see cref="IDapperImplementor.Update{T}(IDbConnection, T, object IDbTransaction, int?)"/>.
+        /// </summary>
+        public async Task<bool> UpdateAsync<T>(IDbConnection connection, T entity, object predicate, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties, IList<IProjection> colsToUpdate = null)
+        {
+            return await InternalUpdateAsync(connection, entity, predicate, transaction, colsToUpdate, commandTimeout, ignoreAllKeyProperties);
         }
         /// <summary>
         /// The asynchronous counterpart to <see cref="IDapperImplementor.Delete{T}(IDbConnection, T, IDbTransaction, int?)"/>.
@@ -226,6 +237,13 @@ namespace DapperExtensions
         {
             GetMapAndPredicate<T>(entity, out var classMap, out var predicate, true);
             return await InternalUpdateAsync(connection, entity, classMap, predicate, transaction, cols, commandTimeout, ignoreAllKeyProperties);
+        }
+
+        private async Task<bool> InternalUpdateAsync<T>(IDbConnection connection, T entity, object predicate, IDbTransaction transaction, IList<IProjection> cols,
+            int? commandTimeout, bool ignoreAllKeyProperties = true)
+        {
+            GetMapAndPredicate<T>(predicate, out var classMap, out var wherePredicate, true);
+            return await InternalUpdateAsync(connection, entity, classMap, wherePredicate, transaction, cols, commandTimeout, ignoreAllKeyProperties);
         }
 
         private async void InternalUpdateAsync<T>(IDbConnection connection, IEnumerable<T> entities, IDbTransaction transaction, IList<IProjection> cols,

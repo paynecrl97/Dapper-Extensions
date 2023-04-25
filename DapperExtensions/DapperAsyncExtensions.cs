@@ -248,6 +248,15 @@ namespace DapperExtensions
         }
 
         /// <summary>
+        /// Executes an update query using the specified predicate.
+        /// </summary>
+        public static Task<bool> UpdateAsync<T>(this IDbConnection connection, T entity, object predicate, IDbTransaction transaction = null,
+            int? commandTimeout = null, bool ignoreAllKeyProperties = true)
+        {
+            return Instance.UpdateAsync(connection, entity, predicate, transaction, commandTimeout, ignoreAllKeyProperties, null);
+        }
+
+        /// <summary>
         /// Executes an update query for the specified entity.
         /// </summary>
         public static Task<bool> UpdatePartialAsync<TIn, TOut>(this IDbConnection connection, TIn entity, IDbTransaction transaction = null,

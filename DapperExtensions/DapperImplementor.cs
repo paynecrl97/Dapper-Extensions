@@ -24,6 +24,7 @@ namespace DapperExtensions
         void Insert<T>(IDbConnection connection, IEnumerable<T> entities, IDbTransaction transaction, int? commandTimeout);
         dynamic Insert<T>(IDbConnection connection, T entity, IDbTransaction transaction, int? commandTimeout);
         bool Update<T>(IDbConnection connection, T entity, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties);
+        bool Update<T>(IDbConnection connection, T entity, object predicate, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties);
         void Update<T>(IDbConnection connection, IEnumerable<T> entities, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties);
         bool UpdatePartial<TIn, TOut>(IDbConnection connection, TIn entity, Expression<Func<TIn, TOut>> func, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties) where TIn : class;
         void UpdatePartial<TIn, TOut>(IDbConnection connection, IEnumerable<TIn> entities, Expression<Func<TIn, TOut>> func, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties) where TIn : class;
@@ -96,6 +97,11 @@ namespace DapperExtensions
         public bool Update<T>(IDbConnection connection, T entity, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties = false)
         {
             return InternalUpdate(connection, entity, transaction, null, commandTimeout, ignoreAllKeyProperties);
+        }
+
+        public bool Update<T>(IDbConnection connection, T entity, object predicate, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties = true)
+        {
+            return InternalUpdate(connection, entity, predicate, transaction, null, commandTimeout, ignoreAllKeyProperties);
         }
 
         public void Update<T>(IDbConnection connection, IEnumerable<T> entities, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties = false)
@@ -758,6 +764,12 @@ namespace DapperExtensions
         {
             GetMapAndPredicate<T>(entity, out var classMap, out var predicate, true);
             return InternalUpdate(connection, entity, classMap, predicate, transaction, cols, commandTimeout, ignoreAllKeyProperties);
+        }
+
+        protected bool InternalUpdate<T>(IDbConnection connection, T entity, object predicate, IDbTransaction transaction, IList<IProjection> cols, int? commandTimeout, bool ignoreAllKeyProperties = true)
+        {
+            GetMapAndPredicate<T>(predicate, out var classMap, out var wherePredicate, true);
+            return InternalUpdate(connection, entity, classMap, wherePredicate, transaction, cols, commandTimeout, ignoreAllKeyProperties);
         }
 
         protected void InternalUpdate<T>(IDbConnection connection, IEnumerable<T> entities, IDbTransaction transaction, IList<IProjection> cols, int? commandTimeout, bool ignoreAllKeyProperties = false)

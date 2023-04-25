@@ -176,6 +176,14 @@ namespace DapperExtensions
         }
 
         /// <summary>
+        /// Executes an update query using the specified predicate.
+        /// </summary>
+        public static bool Update<T>(this IDbConnection connection, T entity, object predicate, IDbTransaction transaction = null, int? commandTimeout = null, bool ignoreAllKeyProperties = true)
+        {
+            return Instance.Update(connection, entity, predicate, transaction, commandTimeout, ignoreAllKeyProperties);
+        }
+
+        /// <summary>
         /// Executes an update query for the specified entity.
         /// </summary>
         public static void Update<T>(this IDbConnection connection, IEnumerable<T> entities, IDbTransaction transaction = null, int? commandTimeout = null, bool ignoreAllKeyProperties = false)
